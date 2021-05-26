@@ -1,0 +1,51 @@
+<html>
+    <head>
+        <title>chat app</title>
+    </head>
+    <body>
+        <ul id="messages">
+            websocketを使ったチャットアプリケーション
+            <form id="chatbox">
+                <textarea name="text" id="chat-text" cols="30" rows="10"></textarea>
+                <input type="submit" value="送信">
+            </form>
+        </ul>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script>
+            $(function() {
+
+                var socket = null;
+                var msgBox = $("#chatbox textarea");
+                var messages = $("#messages");
+
+                $("#chatbox").submit(function() {
+
+                    if (!msgBox.val()) return false;
+                    if (!socket) {
+                        alert("Error: websocket接続が行われていません")
+                        return false;
+                    }
+                    socket.send(msgBox.val());
+                    msgBox.val("");
+                    return false;
+                });
+
+                if (!window["WebSocket"]) {
+                    alert("Error: websocketに対応していないブラウザです")
+                } else {
+                    console.log("create socket")
+                    // ソケットの生成
+                    socket = new WebSocket("ws:localhost:8080/room");
+                    socket.onclose = function() {
+                        alert("接続が終了しました")
+                    }
+                    socket.onmessage = function(e) {
+                        console.log("messages", messages)
+                        messages.append($("<li>").text(e.data))
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>
